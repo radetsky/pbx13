@@ -1,4 +1,5 @@
-# PBX13 project 
+# PBX13 project (not ready! Do not try to download it and use. WIP now.)
+
 ## Why the name is PBX13?
 
 It is like Apollo. I have created many configurations of PBX for customers and two different web-based configuration sites. With Drupal (PHP-based CMS) and with Perl+jQuery. All my installations have the name PearlPBX.
