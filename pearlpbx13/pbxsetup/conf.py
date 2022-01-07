@@ -1,4 +1,4 @@
-from .models import SIPTransport
+from .models import SIPTransport, SIPUser
 
 
 def make_pjsip_conf_transports():
@@ -38,9 +38,29 @@ def make_pjsip_conf_transports():
     return result
 
 
+def make_pjsip_conf_uplinks():
+    result = '; ==== Uplinks section ====\n'
+
+    return result
+
+
+def make_pjsip_conf_users():
+    result = '; ==== Users section ====\n'
+    users = SIPUser.objects.all()
+    for user in users:
+        comment = '; ' + user.name + '\n'
+        section = f'[{user.username}]\n'
+
+        result += comment + section
+
+    return result
+
+
 def make_pjsip_conf():
 
     plaintext = "; === This is auto generated file. Do not edit it. Use PBX13 admin panel! ===\n"
     plaintext += make_pjsip_conf_transports()
+    plaintext += make_pjsip_conf_uplinks()
+    plaintext += make_pjsip_conf_users()
 
     return plaintext

@@ -7,8 +7,8 @@ from .forms import SIPPeerForm, SIPUserForm
 
 class SIPUserAdmin(admin.ModelAdmin):
     form = SIPUserForm
-    list_display = ('name', 'username')
-    ordering = ['name', 'username']
+    list_display = ('name', 'username', 'extension')
+    ordering = ['name', 'username', 'extension']
 
 
 class SIPPeerAdmin(admin.ModelAdmin):
