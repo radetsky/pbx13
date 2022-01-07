@@ -50,8 +50,18 @@ def make_pjsip_conf_users():
     for user in users:
         comment = '; ' + user.name + '\n'
         section = f'[{user.username}]\n'
+        auth = f'auth = {user.username}\n'
+        aors = f'aors = {user.username}\n'
+        callerid = f'callerid = {user.name} <{user.extension}>\n'
 
-        result += comment + section
+        type_auth = f'[{user.username}]\ntype = auth\nauth_type = userpass\n'
+        type_auth += f'password = {user.secret}\nusername = {user.username}\n\n'
+
+        type_aor = f'[{user.username}]\ntype = aor\nmax_contacts = 1\nremove_existing = yes\n\n'
+
+        result += comment + section + auth + aors + callerid
+        result += '\n' + type_auth + type_aor
+        result += '\n'
 
     return result
 
