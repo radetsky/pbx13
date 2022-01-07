@@ -1,4 +1,4 @@
-from .models import SIPTransport, SIPUser
+from .models import SIPTransport, SIPUser, Settings
 
 
 def make_pjsip_conf_transports():
@@ -44,22 +44,32 @@ def make_pjsip_conf_uplinks():
     return result
 
 
+def make_pjsip_conf_users_template():
+    result = '; ==== Users template ====\n'
+    result += '[user-template](!)\n'
+    settings = Settings.objects.first()
+    result += settings.user_template
+    result += '\n\n'
+    return result
+
+
 def make_pjsip_conf_users():
     result = '; ==== Users section ====\n'
     users = SIPUser.objects.all()
     for user in users:
         comment = '; ' + user.name + '\n'
-        section = f'[{user.username}]\n'
+        section = f'[{user.username}](user-template)\n'
         auth = f'auth = {user.username}\n'
         aors = f'aors = {user.username}\n'
         callerid = f'callerid = {user.name} <{user.extension}>\n'
+        custom_settings = user.custom_settings + '\n'
 
         type_auth = f'[{user.username}]\ntype = auth\nauth_type = userpass\n'
         type_auth += f'password = {user.secret}\nusername = {user.username}\n\n'
 
         type_aor = f'[{user.username}]\ntype = aor\nmax_contacts = 1\nremove_existing = yes\n\n'
 
-        result += comment + section + auth + aors + callerid
+        result += comment + section + auth + aors + callerid + custom_settings
         result += '\n' + type_auth + type_aor
         result += '\n'
 
@@ -71,6 +81,7 @@ def make_pjsip_conf():
     plaintext = "; === This is auto generated file. Do not edit it. Use PBX13 admin panel! ===\n"
     plaintext += make_pjsip_conf_transports()
     plaintext += make_pjsip_conf_uplinks()
+    plaintext += make_pjsip_conf_users_template()
     plaintext += make_pjsip_conf_users()
 
     return plaintext
