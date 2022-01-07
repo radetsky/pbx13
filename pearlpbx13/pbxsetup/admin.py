@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import SIPTransport, SIPUser, SIPPeer
+from .models import SIPTransport, SIPUser, SIPPeer, Settings
 from .forms import SIPPeerForm, SIPUserForm
 
 
@@ -37,3 +37,4 @@ class SIPTransportAdmin(admin.ModelAdmin):
 admin.site.register(SIPUser, SIPUserAdmin)
 admin.site.register(SIPPeer, SIPPeerAdmin)
 admin.site.register(SIPTransport, SIPTransportAdmin)
+admin.site.register(Settings)

@@ -58,13 +58,19 @@ class SIPUserForm(forms.ModelForm):
                                         empty_label=None,
                                         )
 
+    custom_settings = forms.CharField(label='Settings',
+                                      widget=forms.Textarea,
+                                      required=False,
+                                      help_text='Custom user settings in asterisk pjsip.conf format')
+
     class Meta:
         model = SIPUser
-        fields = ['name', 'username', 'secret', 'transport', 'extension']
+        fields = ['name', 'username', 'secret',
+                  'transport', 'extension', 'custom_settings']
 
         widgets = {
             # telling Django your password field in the mode is a password input on the template
-            'secret': forms.PasswordInput(render_value=True)
+            'secret': forms.PasswordInput(render_value=True),
         }
 
 

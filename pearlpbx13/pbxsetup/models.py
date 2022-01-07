@@ -75,6 +75,9 @@ class SIPUser(models.Model):
     extension = models.CharField(max_length=32, unique=True, null=True, blank=False,
                                  help_text='Easy way to setup internal extension for the user', verbose_name='Extension')
 
+    custom_settings = models.TextField(null=True, blank=False, default="",
+                                       help_text='Custom user settings', verbose_name='Settings')
+
     class Meta:
         verbose_name_plural = "2. SIP Users"
 
@@ -100,3 +103,27 @@ class SIPPeer(models.Model):
 
     class Meta:
         verbose_name_plural = "3. SIP Uplinks and Peers"
+
+
+class Settings(models.Model):
+    user_template = models.TextField(
+        default='''type = endpoint
+context = default
+allow = !all, g722, ulaw, alaw
+direct_media = no
+trust_id_outbound = yes
+device_state_busy_at = 1
+dtmf_mode = rfc4733
+transport = transport-udp-nat
+rtp_symmetric = yes
+force_rport = yes
+rewrite_contact = yes''',
+        verbose_name='User basic template',
+        help_text='You may override it by custom settings in user form')
+
+    def save(self, *args, **kwargs):
+        self.pk = self.id = 1
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = "99. General Settings"
