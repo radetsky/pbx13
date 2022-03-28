@@ -40,6 +40,7 @@ def make_pjsip_conf_transports():
 
 def make_pjsip_conf_uplinks():
     result = '; ==== Uplinks section ====\n'
+    result += '\n'
 
     return result
 

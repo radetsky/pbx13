@@ -1,5 +1,6 @@
 from django.db import models
 import django.db.models.deletion as deletion
+from .validators import validate_bind_ip
 
 
 class SIPTransport(models.Model):
@@ -29,8 +30,8 @@ class SIPTransport(models.Model):
     protocol = models.CharField(
         max_length=3, null=False, choices=PROTOCOL_CHOICES, default='udp', blank=False)
 
-    bind = models.GenericIPAddressField(
-        default="0.0.0.0", null=False, blank=False)
+    bind = models.CharField(validators=[validate_bind_ip],
+                            default="0.0.0.0", null=False, blank=False, max_length=256)
     local_nets = models.CharField(null=True, blank=True, max_length=256,
                                   verbose_name="local_net",
                                   help_text="List all local networks splitted by comma: 10.0.0.0/16, 192.168.0.0/24")

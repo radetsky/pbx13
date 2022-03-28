@@ -20,5 +20,8 @@ I plan to extend the project with commercial functions:
 - telemetry and logs panel using Prometheus, Loki, and Grafana bricks and shits
 - alert management using Grafana and Slack integration 
 
+- Callback hunter from the web interface using our service 
+- Direct webrtc call to the customer support service. It is time to use WebRTC. Even iPhone can do it.
+
 
 
