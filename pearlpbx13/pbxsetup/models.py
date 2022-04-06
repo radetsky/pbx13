@@ -92,11 +92,22 @@ class SIPPeer(models.Model):
         max_length=32, unique=True, null=False, default="",
         help_text='Username for the connection used for remote side', verbose_name='Username')
     secret = models.CharField(
-        max_length=32, unique=True, null=False, default="", help_text='Clear text password for the connection used for remote side', verbose_name='Password')
+        max_length=32, unique=True, null=False, default="",
+        help_text='Clear text password for the connection used for remote side',
+        verbose_name='Password')
+
+    host_port = models.CharField(
+        max_length=256, null=False, blank=False, default="",
+        help_text='Host:Port of the peer. Port is optional.', verbose_name='Host:Port')
+
     registrationHere = models.BooleanField(
-        default=False, help_text='Should remote peer register here?', verbose_name='Registration here')
-    registrationString = models.CharField(blank=True,
-                                          max_length=256, help_text='Registration string to remote side username:password@ip.ad.dr.es:port/extension', verbose_name='Registration')
+        default=False,
+        help_text='Should remote peer register here? Used for GSM, E1, T1, FXS, FXO gateways, etc. ',
+        verbose_name='Registration here')
+    registrationThere = models.BooleanField(
+        default=False, help_text='Should we register on remote service? Typically used for providers',
+        verbose_name='Registration there')
+
     callLimit = models.SmallIntegerField(
         default=0, help_text='Maximum calls on the trunk', verbose_name='Call Limit')
     transport = models.ForeignKey(

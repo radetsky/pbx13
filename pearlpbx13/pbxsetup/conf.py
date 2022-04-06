@@ -1,4 +1,4 @@
-from .models import SIPTransport, SIPUser, Settings
+from .models import SIPPeer, SIPTransport, SIPUser, Settings
 
 
 def make_pjsip_conf_transports():
@@ -6,8 +6,7 @@ def make_pjsip_conf_transports():
     transports = SIPTransport.objects.all()
     for transport in transports:
         description = '; ' + transport.description + '\n'
-        section_name = '[transport-' + \
-            transport.name.replace(' ', '').replace('+', '-').lower() + ']\n'
+        section_name = f'[{transport.name}]\n'  # FIXME validate it
         type = 'type = transport\n'
         protocol = 'protocol = ' + transport.protocol + '\n'
         bind = 'bind = ' + transport.bind + '\n'
@@ -38,10 +37,95 @@ def make_pjsip_conf_transports():
     return result
 
 
-def make_pjsip_conf_uplinks():
-    result = '; ==== Uplinks section ====\n'
+def __section_trunk_remote_registration(trunk: SIPPeer):
+    result = '; Registration\n'
+    result += f'[{trunk.name}]\n'
+    result += 'type=registration\n'
+    result += f'outbound_auth={trunk.name}\n'
+    result += f'server_uri=sip:{trunk.host_port}\n'
+    result += f'client_uri=sip:{trunk.username}@{trunk.host_port}\n'
+    result += 'retry_interval=60\n'
     result += '\n'
 
+    return result
+
+
+def __section_trunk_auth_userpass(trunk: SIPPeer):
+    result = '; Authentication\n'
+    result += f'[{trunk.name}]\n'
+    result += 'type=auth\n'
+    result += 'auth_type=userpass\n'
+    result += f'username={trunk.username}\n'
+    result += f'password={trunk.secret}\n'
+    result += '\n'
+
+    return result
+
+
+def __section_trunk_aor(trunk: SIPPeer):
+    result = '; AOR\n'
+    result += f'[{trunk.name}]\n'
+    result += 'type=aor\n'
+    result += f'contact=sip:{trunk.host_port}\n'
+    result += '\n'
+
+    return result
+
+
+def __section_trunk_endpoint(trunk: SIPPeer):
+    result = '; Endpoint\n'
+    result += f'[{trunk.name}]\n'
+    result += 'type=endpoint\n'
+    result += f'transport={trunk.transport.name}\n'
+    result += f'context=from-{trunk.name}\n'
+    result += 'disallow=all\n'
+    result += 'allow=ulaw,alaw\n'  # TODO list ALLOWED codecs
+    if trunk.registrationThere == True:
+        result += f'outbound_auth={trunk.name}\n'
+
+    if trunk.registrationHere == True or trunk.registrationThere == False:
+        result += f'auth={trunk.name}\n'
+
+    result += f'aors={trunk.name}\n'
+    result += '\n'
+
+    return result
+
+
+def __section_trunk_identify(trunk: SIPPeer):
+    result = '; Identify\n'
+    result += f'[{trunk.name}]\n'
+    result += 'type=identify\n'
+    result += f'endpoint={trunk.name}\n'
+    result += f'match={trunk.host_port}\n'
+    result += '\n'
+
+    return result
+
+
+def make_pjsip_conf_uplinks():
+    result = '; ==== Uplinks section ====\n'
+
+    trunks = SIPPeer.objects.all()
+    for trunk in trunks:
+        comment = '; ' + trunk.name + '\n'
+        result += comment
+        # registration
+        result += __section_trunk_remote_registration(
+            trunk) if trunk.registrationThere else '; do not register on the remote side\n'
+
+        # auth
+        result += __section_trunk_auth_userpass(trunk)
+        # aor
+        result += __section_trunk_aor(trunk)
+        # endpoint
+        result += __section_trunk_endpoint(trunk)
+        # identify
+        result += __section_trunk_identify(trunk)
+
+        result += '\n'
+
+    result += '\n'
     return result
 
 
@@ -60,6 +144,7 @@ def make_pjsip_conf_users():
     for user in users:
         comment = '; ' + user.name + '\n'
         section = f'[{user.username}](user-template)\n'
+        section += f'transport={user.transport.name}\n'
         auth = f'auth = {user.username}\n'
         aors = f'aors = {user.username}\n'
         callerid = f'callerid = {user.name} <{user.extension}>\n'
