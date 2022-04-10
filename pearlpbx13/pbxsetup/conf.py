@@ -42,8 +42,8 @@ def __section_trunk_remote_registration(trunk: SIPPeer):
     result += f'[{trunk.name}]\n'
     result += 'type=registration\n'
     result += f'outbound_auth={trunk.name}\n'
-    result += f'server_uri=sip:{trunk.host_port}\n'
-    result += f'client_uri=sip:{trunk.username}@{trunk.host_port}\n'
+    result += f'server_uri=sip:{trunk.host_port}\\;transport={trunk.transport.protocol}\n'
+    result += f'client_uri=sip:{trunk.username}@{trunk.host_port}\\;transport={trunk.transport.protocol}\n'
     result += 'retry_interval=60\n'
     result += '\n'
 
@@ -138,6 +138,24 @@ def make_pjsip_conf_users_template():
     return result
 
 
+def make_pjsip_conf_users_aor_template():
+    result = '; ==== Users AOR template ====\n'
+    result += '[user-aor-template](!)\n'
+    settings = Settings.objects.first()
+    result += settings.user_aor_template
+    result += '\n\n'
+    return result
+
+
+def make_pjsip_conf_users_auth_template():
+    result = '; ==== Users AUTH template ====\n'
+    result += '[user-auth-template](!)\n'
+    settings = Settings.objects.first()
+    result += settings.user_auth_template
+    result += '\n\n'
+    return result
+
+
 def make_pjsip_conf_users():
     result = '; ==== Users section ====\n'
     users = SIPUser.objects.all()
@@ -148,12 +166,14 @@ def make_pjsip_conf_users():
         auth = f'auth = {user.username}\n'
         aors = f'aors = {user.username}\n'
         callerid = f'callerid = {user.name} <{user.extension}>\n'
-        custom_settings = user.custom_settings + '\n'
+        custom_settings = user.custom_settings + '\n\n'
 
-        type_auth = f'[{user.username}]\ntype = auth\nauth_type = userpass\n'
-        type_auth += f'password = {user.secret}\nusername = {user.username}\n\n'
+        type_auth = f'[{user.username}](user-auth-template)\n'
+        type_auth += f'password = {user.secret}\nusername = {user.username}\n'
+        type_auth += user.custom_auth_settings + '\n\n'
 
-        type_aor = f'[{user.username}]\ntype = aor\nmax_contacts = 1\nremove_existing = yes\n\n'
+        type_aor = f'[{user.username}](user-aor-template)\n'
+        type_aor += user.custom_aor_settings + '\n\n'
 
         result += comment + section + auth + aors + callerid + custom_settings
         result += '\n' + type_auth + type_aor
@@ -168,6 +188,8 @@ def make_pjsip_conf():
     plaintext += make_pjsip_conf_transports()
     plaintext += make_pjsip_conf_uplinks()
     plaintext += make_pjsip_conf_users_template()
+    plaintext += make_pjsip_conf_users_aor_template()
+    plaintext += make_pjsip_conf_users_auth_template()
     plaintext += make_pjsip_conf_users()
 
     return plaintext

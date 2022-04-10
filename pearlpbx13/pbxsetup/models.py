@@ -78,6 +78,11 @@ class SIPUser(models.Model):
 
     custom_settings = models.TextField(null=True, blank=False, default="",
                                        help_text='Custom user settings', verbose_name='Settings')
+    custom_auth_settings = models.TextField(null=True, blank=False, default="",
+                                            help_text='Custom user [auth] section', verbose_name='Auth Settings')
+
+    custom_aor_settings = models.TextField(null=True, blank=False, default="",
+                                           help_text='Custom user [aor] section', verbose_name='AOR Settings')
 
     class Meta:
         verbose_name_plural = "2. SIP Users"
@@ -132,6 +137,21 @@ force_rport = yes
 rewrite_contact = yes''',
         verbose_name='User basic template',
         help_text='You may override it by custom settings in user form')
+
+    user_aor_template = models.TextField(
+        default='''type = aor
+max_contacts = 1
+remove_existing = yes''',
+        verbose_name='User AOR template',
+        help_text='You may override it by custom settings in user form'
+    )
+
+    user_auth_template = models.TextField(
+        default='''type = auth
+auth_type = userpass''',
+        verbose_name='User auth template',
+        help_text='You may override it by custom settings in user form'
+    )
 
     def save(self, *args, **kwargs):
         self.pk = self.id = 1
