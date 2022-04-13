@@ -12,4 +12,11 @@ cd /usr/src/asterisk-18.11.1 && ./contrib/scripts/get_mp3_source.sh
 cd /usr/src/asterisk-18.11.1 && ./configure --prefix=/ --enable-dev-mode --with-crypto --with-postgres --with-spandsp --with-jansson-bundled --with-opus && make menuselect.makeopts && ./menuselect/menuselect --enable codec_opus && make && make install && make basic-pbx
 
 
+# install certbot from let's encrypt
+snap install core
+apt-get remove certbot
+snap refresh core
+snap install --classic certbot
+ln -s /snap/bin/certbot /usr/bin/certbot
+
 
