@@ -156,28 +156,80 @@ def make_pjsip_conf_users_auth_template():
     return result
 
 
+def __make_pjsip_conf_webrtc_user(user: SIPUser):
+    result = '; ==== WebRTC user ====\n'
+    result += f'[{user.username}](webrtc_template_endpoint)\n'
+    result += 'type=endpoint\n'
+    result += f'transport={user.transport.name}\n'
+    result += f'auth={user.username}\n'
+    result += f'aors={user.username}\n'
+    result += f'callerid= {user.name} <{user.extension}>\n'
+    result += user.custom_settings + '\n'
+    result += '\n'
+
+    result += f'[{user.username}](webrtc-auth-template)\n'
+    result += f'md5_cred = {user.md5_cred}\nusername = {user.username}\n'
+    result += f'realm = {user.realm}\n'
+    result += user.custom_auth_settings + '\n\n'
+
+    result += f'[{user.username}](webrtc-aor-template)\n'
+    result += user.custom_aor_settings + '\n\n'
+    return result
+
+
 def make_pjsip_conf_users():
     result = '; ==== Users section ====\n'
     users = SIPUser.objects.all()
     for user in users:
-        comment = '; ' + user.name + '\n'
-        section = f'[{user.username}](user-template)\n'
-        section += f'transport={user.transport.name}\n'
-        auth = f'auth = {user.username}\n'
-        aors = f'aors = {user.username}\n'
-        callerid = f'callerid = {user.name} <{user.extension}>\n'
-        custom_settings = user.custom_settings + '\n\n'
+        if user.transport.protocol == 'wss':
+            result += __make_pjsip_conf_webrtc_user(user)
+            continue
 
-        type_auth = f'[{user.username}](user-auth-template)\n'
-        type_auth += f'password = {user.secret}\nusername = {user.username}\n'
-        type_auth += user.custom_auth_settings + '\n\n'
+        result += '; ' + user.name + '\n'
+        result += f'[{user.username}](user-template)\n'
+        result += f'transport={user.transport.name}\n'
+        result += f'auth = {user.username}\n'
+        result += f'aors = {user.username}\n'
+        result += f'callerid = {user.name} <{user.extension}>\n'
+        result += user.custom_settings + '\n\n'
 
-        type_aor = f'[{user.username}](user-aor-template)\n'
-        type_aor += user.custom_aor_settings + '\n\n'
+        result += f'[{user.username}](user-auth-template)\n'
+        result += f'md5_cred = {user.md5_cred}\nusername = {user.username}\n'
+        result += f'realm = {user.realm}\n'
+        result += user.custom_auth_settings + '\n\n'
 
-        result += comment + section + auth + aors + callerid + custom_settings
-        result += '\n' + type_auth + type_aor
+        result += f'[{user.username}](user-aor-template)\n'
+        result += user.custom_aor_settings + '\n\n'
+
         result += '\n'
+
+    return result
+
+
+def make_pjsip_webrtc_templates():
+    qs = SIPTransport.objects.filter(protocol='wss')
+    if len(qs) == 0:
+        return ''
+
+    result = '; ==== WebRTC templates ====\n'
+    result += '''; WebRTC Template for Endpoint
+; -----------
+[webrtc-template-endpoint](!)\n'''
+    settings = Settings.objects.first()
+    result += settings.webrtc_template
+    result += '\n\n'
+
+    result += '''; WebRTC Template for AOR
+; -----------
+[webrtc-template-aor](!)\n'''
+    result += settings.webrtc_aor_template
+    result += '\n\n'
+
+    result += '''; WebRTC Template for Auth
+; -----------
+[webrtc-template-auth](!)\n'''
+    result += settings.webrtc_auth_template
+    result += '\n\n'
 
     return result
 
@@ -186,6 +238,7 @@ def make_pjsip_conf():
 
     plaintext = "; === This is auto generated file. Do not edit it. Use PBX13 admin panel! ===\n"
     plaintext += make_pjsip_conf_transports()
+    plaintext += make_pjsip_webrtc_templates()
     plaintext += make_pjsip_conf_uplinks()
     plaintext += make_pjsip_conf_users_template()
     plaintext += make_pjsip_conf_users_aor_template()

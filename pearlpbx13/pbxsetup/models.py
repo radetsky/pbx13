@@ -1,6 +1,7 @@
 from django.db import models
 import django.db.models.deletion as deletion
 from .validators import validate_bind_ip
+from hashlib import md5
 
 
 class SIPTransport(models.Model):
@@ -84,6 +85,14 @@ class SIPUser(models.Model):
     custom_aor_settings = models.TextField(null=True, blank=False, default="",
                                            help_text='Custom user [aor] section', verbose_name='AOR Settings')
 
+    @property
+    def realm(self):
+        return f'{self.transport.protocol}-{self.username}'
+
+    @property
+    def md5_cred(self):
+        return md5(f'{self.username}:{self.secret}:{self.realm}'.encode('utf-8')).hexdigest()
+
     class Meta:
         verbose_name_plural = "2. SIP Users"
 
@@ -148,8 +157,36 @@ remove_existing = yes''',
 
     user_auth_template = models.TextField(
         default='''type = auth
-auth_type = userpass''',
+auth_type = md5''',
         verbose_name='User auth template',
+        help_text='You may override it by custom settings in user form'
+    )
+
+    webrtc_template = models.TextField(
+        default='''
+dtls_auto_generate_cert=yes
+webrtc=yes
+context=default
+max_audio_streams = 1
+max_video_streams = 15
+disallow=all
+allow=opus,g722,ulaw,vp9,vp8,h264''',
+        verbose_name='WebRTC template for endpoint',
+        help_text='You may override it by custom settings in user form'
+    )
+
+    webrtc_aor_template = models.TextField(
+        default='''type = aor
+max_contacts = 15
+remove_existing = yes''',
+        verbose_name='WebRTC AOR template',
+        help_text='You may override it by custom settings in user form'
+    )
+
+    webrtc_auth_template = models.TextField(
+        default='''type = auth
+auth_type = md5''',
+        verbose_name='WebRTC auth template',
         help_text='You may override it by custom settings in user form'
     )
 
