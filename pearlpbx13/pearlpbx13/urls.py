@@ -19,5 +19,6 @@ from django.contrib import admin
 
 urlpatterns = [
     path('pbxsetup/', include('pbxsetup.urls')),
+    path('agentconf/', include('agentconf.urls')),
     path('admin/', admin.site.urls),
 ]
