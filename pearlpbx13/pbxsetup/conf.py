@@ -158,7 +158,7 @@ def make_pjsip_conf_users_auth_template():
 
 def __make_pjsip_conf_webrtc_user(user: SIPUser):
     result = '; ==== WebRTC user ====\n'
-    result += f'[{user.username}](webrtc_template_endpoint)\n'
+    result += f'[{user.username}](webrtc-template-endpoint)\n'
     result += 'type=endpoint\n'
     result += f'transport={user.transport.name}\n'
     result += f'auth={user.username}\n'
@@ -167,12 +167,12 @@ def __make_pjsip_conf_webrtc_user(user: SIPUser):
     result += user.custom_settings + '\n'
     result += '\n'
 
-    result += f'[{user.username}](webrtc-auth-template)\n'
+    result += f'[{user.username}](webrtc-template-auth)\n'
     result += f'md5_cred = {user.md5_cred}\nusername = {user.username}\n'
     result += f'realm = {user.realm}\n'
     result += user.custom_auth_settings + '\n\n'
 
-    result += f'[{user.username}](webrtc-aor-template)\n'
+    result += f'[{user.username}](webrtc-template-aor)\n'
     result += user.custom_aor_settings + '\n\n'
     return result
 

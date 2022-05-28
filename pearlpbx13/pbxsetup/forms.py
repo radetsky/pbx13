@@ -76,7 +76,7 @@ class SIPUserForm(forms.ModelForm):
     class Meta:
         model = SIPUser
         fields = ['name', 'username', 'secret',
-                  'transport', 'extension', 'custom_settings', 'custom_auth_settings', 'custom_aor_settings']
+                  'transport', 'extension', 'allowed_extension', 'custom_settings', 'custom_auth_settings', 'custom_aor_settings']
 
         widgets = {
             # telling Django your password field in the mode is a password input on the template

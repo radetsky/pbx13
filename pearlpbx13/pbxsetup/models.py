@@ -77,6 +77,9 @@ class SIPUser(models.Model):
     extension = models.CharField(max_length=32, unique=True, null=True, blank=False,
                                  help_text='Easy way to setup internal extension for the user', verbose_name='Extension')
 
+    allowed_extension = models.CharField(max_length=32, unique=False, null=True, blank=False, default='s',
+                                         help_text='Only one allowed extension for the user', verbose_name='Allowed extension')
+
     custom_settings = models.TextField(null=True, blank=False, default="",
                                        help_text='Custom user settings', verbose_name='Settings')
     custom_auth_settings = models.TextField(null=True, blank=False, default="",
@@ -132,6 +135,16 @@ class SIPPeer(models.Model):
 
 
 class Settings(models.Model):
+    domain = models.CharField(
+        max_length=64, unique=True, null=False, blank=False, default="webtel.cloud", verbose_name="Hostname of the server", help_text="Hostname of the server")
+
+    wss_port = models.SmallIntegerField(default=8089, null=False, blank=False,
+                                        verbose_name="WSS port of the server", help_text="WSS port of the server")
+
+    @property
+    def wss_url(self):
+        return f'wss://{self.domain}:{self.wss_port}/ws'
+
     user_template = models.TextField(
         default='''type = endpoint
 context = default

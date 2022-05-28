@@ -1,4 +1,5 @@
 .python-venv/
+.env.fish
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
