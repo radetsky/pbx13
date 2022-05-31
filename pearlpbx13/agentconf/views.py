@@ -4,8 +4,13 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.conf import settings
 from .agentconf import webtel_params, django_user_params
 
+from pythemis.scell import SCellSeal
+
+
 import logging
 import json
+import base64
+
 
 """
 This is an app that returns configuration files for an agents.
@@ -13,6 +18,7 @@ This is an app that returns configuration files for an agents.
 
 
 logger = logging.getLogger(__name__)
+WEBTEL_SYNC_PREFIX = b'webtel-sync-'
 
 
 @csrf_exempt if settings.DEBUG else csrf_protect
@@ -22,7 +28,11 @@ def webtel(request):
     json_data = json.loads(request.body)
     print(json_data)
     try:
-        username = json_data['username']
+        b64data = json_data['username']
+        data = json.loads(base64.b64decode(b64data))
+        username = data['username']
+        b64symkey = data['key']
+
     except KeyError:
         return HttpResponse('{"error": "username is required"}', content_type='application/json')
 
@@ -31,8 +41,21 @@ def webtel(request):
         return HttpResponse('{"error": "username is required"}', content_type='application/json')
 
     user_params['status'] = 'ok'
+    result = str.encode(json.dumps(user_params))
+    print(f"result and length: {result} {len(result)}")
 
-    return HttpResponse(json.dumps(user_params), content_type='application/json')
+    symkey = base64.b64decode(b64symkey)
+    cell = SCellSeal(key=symkey)
+    encrypted_result = cell.encrypt(result, WEBTEL_SYNC_PREFIX)
+    print(encrypted_result)
+    print(f"encrypted_result len: {len(encrypted_result)}")
+    b64encoded_result = base64.b64encode(encrypted_result)
+    print(f"base64 encoded len: {len(b64encoded_result)}")
+
+    decrypted_result = cell.decrypt(encrypted_result, WEBTEL_SYNC_PREFIX)
+    print(decrypted_result)
+
+    return HttpResponse(b64encoded_result, content_type='text/plain')
 
 
 @csrf_protect

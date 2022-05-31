@@ -1,3 +1,5 @@
 Django
 django-cors-headers 
 python-dotenv
+pythemis
+
