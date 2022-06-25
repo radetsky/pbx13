@@ -1,20 +1,22 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import SIPTransport, SIPUser, SIPPeer, Settings
-from .forms import SIPPeerForm, SIPUserForm
+from .models import SIPTransport, SIPUser, SIPPeer, Settings, DialplanContext, DialplanExtension
+from .forms import SIPPeerForm, SIPUserForm, DialplanExtensionForm
 
 
 class SIPUserAdmin(admin.ModelAdmin):
     form = SIPUserForm
     list_display = ('name', 'username', 'extension')
     ordering = ['name', 'username', 'extension']
+    search_fields = ['name', 'username', 'extension']
 
 
 class SIPPeerAdmin(admin.ModelAdmin):
     form = SIPPeerForm
     list_display = ('name', 'description')
     ordering = ['name', 'description']
+    search_fields = ['name', 'description']
 
 
 class SIPTransportAdmin(admin.ModelAdmin):
@@ -34,7 +36,24 @@ class SIPTransportAdmin(admin.ModelAdmin):
     ordering = ['name', 'description']
 
 
+class DialplanContextAdmin(admin.ModelAdmin):
+    fields = ['name', 'description']
+    list_display = ('name', 'description')
+    ordering = ['name', 'description']
+    search_fields = ['name', 'description']
+
+
+class DialplanExtensionAdmin(admin.ModelAdmin):
+    form = DialplanExtensionForm
+    fields = ['context', 'ext', 'dialplan', 'description']
+    list_display = ('context_name', 'ext', 'description')
+    ordering = ['context', 'ext']
+    search_fields = ['ext', 'dialplan', 'description']
+
+
 admin.site.register(SIPUser, SIPUserAdmin)
 admin.site.register(SIPPeer, SIPPeerAdmin)
 admin.site.register(SIPTransport, SIPTransportAdmin)
+admin.site.register(DialplanContext, DialplanContextAdmin)
+admin.site.register(DialplanExtension, DialplanExtensionAdmin)
 admin.site.register(Settings)

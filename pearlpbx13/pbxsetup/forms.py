@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms import fields
 from django.utils.translation import gettext_lazy as _
 
-from .models import SIPPeer, SIPTransport, SIPUser
+from .models import SIPPeer, SIPTransport, SIPUser, DialplanContext, DialplanExtension, Settings
 
 
 def validate_alphanumeric(value):
@@ -33,6 +33,11 @@ def min3len(value):
 
 
 class SIPTransportChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.name}"
+
+
+class DialplanContextChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.name}"
 
@@ -111,3 +116,30 @@ class SIPPeerForm(forms.ModelForm):
         widgets = {
             'secret': forms.PasswordInput(render_value=True)
         }
+
+
+class DialplanExtensionForm(forms.ModelForm):
+    context = DialplanContextChoiceField(label="Context",
+                                         required=True,
+                                         help_text='Select context for the extension',
+                                         queryset=DialplanContext.objects.all(),
+                                         empty_label=None,
+                                         )
+    ext = forms.CharField(label="Extension",
+                          required=True,
+                          help_text='Extension for the dialplan.'
+                          )
+
+    dialplan = forms.CharField(label='Dialplan',
+                               widget=forms.Textarea,
+                               required=True,
+                               help_text='Use Asterisk AEL syntax to define the dialplan.')
+
+    description = forms.CharField(label="Description",
+                                  required=False,
+                                  help_text='Description of the extension.'
+                                  )
+
+    class Meta:
+        model = DialplanExtension
+        fields = '__all__'

@@ -134,6 +134,40 @@ class SIPPeer(models.Model):
         verbose_name_plural = "3. SIP Uplinks and Peers"
 
 
+class DialplanContext(models.Model):
+    name = models.CharField(max_length=64, unique=True, null=False, blank=False,
+                            verbose_name='Context name', help_text='Use latin symbols, digits and undercore')
+    description = models.CharField(max_length=64, unique=False, null=False, blank=True,
+                                   verbose_name='Context description', help_text='Use latin symbols, digits and undercore to describe')
+
+    class Meta:
+        db_table = 'diaplan_contexts'
+        verbose_name_plural = "4. Dialplan contexts"
+
+
+class DialplanExtension(models.Model):
+    context = models.ForeignKey(DialplanContext, related_name='Context',
+                                on_delete=deletion.PROTECT, null=True, blank=False)
+    ext = models.CharField(max_length=32, unique=False, null=False, blank=False,
+                           default='_X!', verbose_name='Extension', help_text='Asterisk extension')
+    dialplan = models.TextField(verbose_name='Extension scenario')
+    description = models.CharField(max_length=64, unique=False, null=False, blank=True,
+                                   verbose_name='Extension description', help_text='Use latin symbols, digits and undercore to describe')
+
+    @property
+    def context_name(self):
+        return self.context.name
+
+    class Meta:
+        db_table = 'dialplan_extensions'
+        verbose_name_plural = "5. Dialplan extensions"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['context', 'ext'], name='unique extension inside context')
+        ]
+
+
 class Settings(models.Model):
     domain = models.CharField(
         max_length=64, unique=True, null=False, blank=False, default="webtel.cloud", verbose_name="Hostname of the server", help_text="Hostname of the server")
@@ -141,7 +175,7 @@ class Settings(models.Model):
     wss_port = models.SmallIntegerField(default=8089, null=False, blank=False,
                                         verbose_name="WSS port of the server", help_text="WSS port of the server")
 
-    @property
+    @ property
     def wss_url(self):
         return f'wss://{self.domain}:{self.wss_port}/ws'
 
