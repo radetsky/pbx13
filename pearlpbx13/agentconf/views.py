@@ -42,19 +42,11 @@ def webtel(request):
 
     user_params['status'] = 'ok'
     result = str.encode(json.dumps(user_params))
-    print(f"result and length: {result} {len(result)}")
 
     symkey = base64.b64decode(b64symkey)
     cell = SCellSeal(key=symkey)
     encrypted_result = cell.encrypt(result, WEBTEL_SYNC_PREFIX)
-    print(encrypted_result)
-    print(f"encrypted_result len: {len(encrypted_result)}")
     b64encoded_result = base64.b64encode(encrypted_result)
-    print(f"base64 encoded len: {len(b64encoded_result)}")
-
-    decrypted_result = cell.decrypt(encrypted_result, WEBTEL_SYNC_PREFIX)
-    print(decrypted_result)
-
     return HttpResponse(b64encoded_result, content_type='text/plain')
 
 
