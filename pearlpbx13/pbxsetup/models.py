@@ -64,6 +64,17 @@ class SIPTransport(models.Model):
         verbose_name_plural = "1. SIP Transports"
 
 
+class DialplanContext(models.Model):
+    name = models.CharField(max_length=64, unique=True, null=False, blank=False,
+                            verbose_name='Context name', help_text='Use latin symbols, digits and undercore')
+    description = models.CharField(max_length=64, unique=False, null=False, blank=True,
+                                   verbose_name='Context description', help_text='Use latin symbols, digits and undercore to describe')
+
+    class Meta:
+        db_table = 'diaplan_contexts'
+        verbose_name_plural = "4. Dialplan contexts"
+
+
 class SIPUser(models.Model):
 
     name = models.CharField(default="", max_length=64, blank=False,
@@ -76,6 +87,9 @@ class SIPUser(models.Model):
         SIPTransport, related_name='sip_user_transport', on_delete=deletion.PROTECT, null=True, blank=False)
     extension = models.CharField(max_length=32, unique=True, null=True, blank=False,
                                  help_text='Easy way to setup internal extension for the user', verbose_name='Extension')
+
+    context = models.ForeignKey(
+        DialplanContext, related_name='sip_user_context', on_delete=deletion.PROTECT, null=True, blank=False)
 
     allowed_extension = models.CharField(max_length=32, unique=False, null=True, blank=False, default='s',
                                          help_text='Only one allowed extension for the user', verbose_name='Allowed extension')
@@ -130,19 +144,11 @@ class SIPPeer(models.Model):
     transport = models.ForeignKey(
         SIPTransport, related_name='sip_peer_transport', on_delete=deletion.PROTECT, null=True, blank=False)
 
+    context = models.ForeignKey(
+        DialplanContext, related_name='sip_peer_context', on_delete=deletion.PROTECT, null=True, blank=False)
+
     class Meta:
         verbose_name_plural = "3. SIP Uplinks and Peers"
-
-
-class DialplanContext(models.Model):
-    name = models.CharField(max_length=64, unique=True, null=False, blank=False,
-                            verbose_name='Context name', help_text='Use latin symbols, digits and undercore')
-    description = models.CharField(max_length=64, unique=False, null=False, blank=True,
-                                   verbose_name='Context description', help_text='Use latin symbols, digits and undercore to describe')
-
-    class Meta:
-        db_table = 'diaplan_contexts'
-        verbose_name_plural = "4. Dialplan contexts"
 
 
 class DialplanExtension(models.Model):

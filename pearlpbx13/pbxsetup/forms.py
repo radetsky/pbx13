@@ -63,6 +63,13 @@ class SIPUserForm(forms.ModelForm):
                                         empty_label=None,
                                         )
 
+    context = DialplanContextChoiceField(label="Context",
+                                         required=True,
+                                         help_text='Select context for the user',
+                                         queryset=DialplanContext.objects.all(),
+                                         empty_label=None,
+                                         )
+
     custom_settings = forms.CharField(label='Settings',
                                       widget=forms.Textarea,
                                       required=False,
@@ -81,7 +88,8 @@ class SIPUserForm(forms.ModelForm):
     class Meta:
         model = SIPUser
         fields = ['name', 'username', 'secret',
-                  'transport', 'extension', 'allowed_extension', 'custom_settings', 'custom_auth_settings', 'custom_aor_settings']
+                  'transport', 'extension', 'context', 'allowed_extension',
+                  'custom_settings', 'custom_auth_settings', 'custom_aor_settings']
 
         widgets = {
             # telling Django your password field in the mode is a password input on the template
@@ -108,6 +116,13 @@ class SIPPeerForm(forms.ModelForm):
                                         queryset=SIPTransport.objects.all(),
                                         empty_label=None,
                                         )
+
+    context = DialplanContextChoiceField(label="Context",
+                                         required=True,
+                                         help_text='Select context for the peer',
+                                         queryset=DialplanContext.objects.all(),
+                                         empty_label=None,
+                                         )
 
     class Meta:
         model = SIPPeer
