@@ -4,6 +4,8 @@ from django.contrib import admin
 from .models import SIPTransport, SIPUser, SIPPeer, Settings, DialplanContext, DialplanExtension
 from .forms import SIPPeerForm, SIPUserForm, DialplanExtensionForm
 
+from typing import Optional
+
 
 class SIPUserAdmin(admin.ModelAdmin):
     form = SIPUserForm
@@ -36,11 +38,22 @@ class SIPTransportAdmin(admin.ModelAdmin):
     ordering = ['name', 'description']
 
 
+class DialplanExtensionInlineAdmin(admin.TabularInline):
+    min_num: Optional[int] = 1
+    extra: Optional[int] = 0
+    model = DialplanExtension
+
+    form = DialplanExtensionForm
+    fields = ['context', 'ext', 'dialplan', 'description']
+    ordering = ['ext']
+
+
 class DialplanContextAdmin(admin.ModelAdmin):
     fields = ['name', 'description']
     list_display = ('name', 'description')
     ordering = ['name', 'description']
     search_fields = ['name', 'description']
+    inlines = [DialplanExtensionInlineAdmin]
 
 
 class DialplanExtensionAdmin(admin.ModelAdmin):
