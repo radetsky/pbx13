@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import SIPTransport, SIPUser, SIPPeer, Settings, DialplanContext, DialplanExtension
+from .models import SIPTransport, SIPUser, SIPPeer, Settings, DialplanContext, DialplanExtension, DialplanMacro
 from .forms import SIPPeerForm, SIPUserForm, DialplanExtensionForm
 
 from typing import Optional
@@ -64,9 +64,17 @@ class DialplanExtensionAdmin(admin.ModelAdmin):
     search_fields = ['ext', 'dialplan', 'description']
 
 
+class DialplanMacroAdmin(admin.ModelAdmin):
+    fields = ['name', 'description', 'macro']
+    list_display = ('name', 'description')
+    ordering = ['name', 'description']
+    search_fields = ['name', 'description', 'macro']
+
+
 admin.site.register(SIPUser, SIPUserAdmin)
 admin.site.register(SIPPeer, SIPPeerAdmin)
 admin.site.register(SIPTransport, SIPTransportAdmin)
 admin.site.register(DialplanContext, DialplanContextAdmin)
 admin.site.register(DialplanExtension, DialplanExtensionAdmin)
+admin.site.register(DialplanMacro, DialplanMacroAdmin)
 admin.site.register(Settings)

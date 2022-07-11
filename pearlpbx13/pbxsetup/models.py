@@ -168,6 +168,18 @@ class DialplanExtension(models.Model):
         ]
 
 
+class DialplanMacro(models.Model):
+    name = models.CharField(max_length=32, unique=True, null=False, blank=False,
+                            verbose_name='Macro name', help_text='Use latin symbols, digits and undercore')
+    description = models.CharField(max_length=64, unique=False, null=False, blank=True,
+                                   verbose_name='Macro description', help_text='Use latin symbols, digits and undercore to describe')
+    macro = models.TextField(verbose_name='Macro scenario')
+
+    class Meta:
+        db_table = 'dialplan_macros'
+        verbose_name_plural = "6. Dialplan macros"
+
+
 class Settings(models.Model):
     domain = models.CharField(
         max_length=64, unique=True, null=False, blank=False, default="webtel.cloud", verbose_name="Hostname of the server", help_text="Hostname of the server")
