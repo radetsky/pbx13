@@ -91,7 +91,7 @@ class SIPUser(models.Model):
     context = models.ForeignKey(
         DialplanContext, related_name='sip_user_context', on_delete=deletion.PROTECT, null=True, blank=False)
 
-    allowed_extension = models.CharField(max_length=32, unique=False, null=True, blank=False, default='s',
+    allowed_extension = models.CharField(max_length=32, unique=False, null=True, blank=True, default='',
                                          help_text='Only one allowed extension for the user', verbose_name='Allowed extension')
 
     custom_settings = models.TextField(null=True, blank=False, default="",
@@ -152,7 +152,7 @@ class SIPPeer(models.Model):
 
 
 class DialplanExtension(models.Model):
-    context = models.ForeignKey(DialplanContext, related_name='Context',
+    context = models.ForeignKey(DialplanContext, related_name='extensions',
                                 on_delete=deletion.PROTECT, null=True, blank=False)
     ext = models.CharField(max_length=32, unique=False, null=False, blank=False,
                            default='_X!', verbose_name='Extension', help_text='Asterisk extension')
